@@ -1,0 +1,71 @@
+---
+title: "costofemp041523"
+author: "Caroline Motzer"
+date: "2023-04-15"
+output: pdf_document
+---
+##Setting working directory
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Volumes/BoorWiedmannLab/clm254_CarolineMotzer/Cost of EMP project/Data")
+```
+##loading packages
+```{r}
+library(rlang)
+library(readr)
+library(car)
+library(emmeans)
+library(ggplot2)
+na.rm = TRUE
+```
+
+##loading in Data and setting working directory
+```{r}
+costofemp_redit_final <- read_csv("/Volumes/BoorWiedmannLab/clm254_CarolineMotzer/Cost of EMP project/Data/costofemp_redit_final.csv")
+View(costofemp_redit_final)
+data <- costofemp_redit_final
+```
+##Creating model to test association between emp investment cost, estimated total value of finished product, EMP dedication (Fscs) and overall prevalence
+```{r}
+costofemp2<- lm(log(EMPinvestmentcost)~ esttotalvaluefinished + Fscs + overallprev2 + annualmilksolidsproc, data = data)
+summary(costofemp2)
+```
+##Checking model assumptions and double checking interpretation (via anova)
+```{r}
+plot(costofemp2)
+hist(costofemp2$residuals)
+plot(predict(costofemp2), residuals(costofemp2))
+plot(data$esttotalvaluefinished, data$EMPinvestmentcost)
+plot(data$overallprev2, data$EMPinvestmentcost)
+plot(data$Fscs, data$EMPinvestmentcost)
+vif(costofemp2)
+anova(costofemp2)
+```
+
+##checking correlation between variables
+```{r}
+cor.test(data$annualmilksolidsproc, data$EMPinvestmentcost)
+cor.test(data$overallprev2, data$EMPinvestmentcost)
+```
+##setting up model to see if change in prevalence from start of year to end of year is associated with spending majority of investment on corrective actions
+```{r}
+costofemp_redit_final$correctiveratio<- costofemp_redit_final$correctiveactionscost/costofemp_redit_final$EMPinvestmentcost
+hist(costofemp_redit_final$correctiveratio, breaks=40)
+costofemp_redit_final$correctivemajority<- "no"
+  costofemp_redit_final$correctivemajority [costofemp_redit_final$correctiveratio>0.8]<-"yes"
+costofemp_redit_final$prevdif<-costofemp_redit_final$Validprev-costofemp_redit_final$Initialprev
+costofemp_redit_final$prevdif<-costofemp_redit_final$Validprev-costofemp_redit_final$Initialprev
+correctiveactionmodel3<- lm(costofemp_redit_final$prevdif~costofemp_redit_final$correctivemajority)
+summary(correctiveactionmodel3)
+```
+##identifying if the mean investment into EMP for Groups 1 and 2 is different than Group 3
+```{r}
+t.test(costofemp_redit_final$EMPinvestmentcost[costofemp_redit_final$esttotalvaluefinished<200001], mu=12613.12)
+costofemp_redit_final$EMPinvestmentcost[costofemp_redit_final$esttotalvaluefinished<200001]
+```
+##identifying correlation between plant's perception of pathogen control and research team's perception of plant's pathogen control. Also identifying correlation between plant's perception of pathogen control and final listeria prevalence
+```{r}
+cor.test(costofemp_redit_final$perceived_control_past, costofemp_redit_final$research_control_past)
+plot(costofemp_redit_final$perceived_control_past, costofemp_redit_final$research_control_past)
+cor.test(costofemp_redit_final$perceived_control_past, costofemp_redit_final$Validprev)
+```
