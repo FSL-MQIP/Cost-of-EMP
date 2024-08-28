@@ -47,25 +47,19 @@ anova(costofemp2)
 cor.test(data$annualmilksolidsproc, data$EMPinvestmentcost)
 cor.test(data$overallprev2, data$EMPinvestmentcost)
 ```
-##setting up model to see if change in prevalence from start of year to end of year is associated with spending majority of investment on corrective actions
+##setting up model to see if change in prevalence from start of year to end of year is associated with investment on corrective actions
 ```{r}
 costofemp_redit_final$correctiveratio<- costofemp_redit_final$correctiveactionscost/costofemp_redit_final$EMPinvestmentcost
 hist(costofemp_redit_final$correctiveratio, breaks=40)
 costofemp_redit_final$correctivemajority<- "no"
   costofemp_redit_final$correctivemajority [costofemp_redit_final$correctiveratio>0.8]<-"yes"
 costofemp_redit_final$prevdif<-costofemp_redit_final$Validprev-costofemp_redit_final$Initialprev
-costofemp_redit_final$prevdif<-costofemp_redit_final$Validprev-costofemp_redit_final$Initialprev
-correctiveactionmodel3<- lm(costofemp_redit_final$prevdif~costofemp_redit_final$correctivemajority)
+correctiveactionmodel3<- lm(costofemp_redit_final$prevdif~costofemp_redit_final$correctiveratio)
 summary(correctiveactionmodel3)
+View(costofemp_redit_final)
 ```
-##identifying if the mean investment into EMP for Groups 1 and 2 is different than Group 3
+##identifying correlation between plant's perception of pathogen control and final listeria prevalence
 ```{r}
-t.test(costofemp_redit_final$EMPinvestmentcost[costofemp_redit_final$esttotalvaluefinished<200001], mu=12613.12)
-costofemp_redit_final$EMPinvestmentcost[costofemp_redit_final$esttotalvaluefinished<200001]
-```
-##identifying correlation between plant's perception of pathogen control and research team's perception of plant's pathogen control. Also identifying correlation between plant's perception of pathogen control and final listeria prevalence
-```{r}
-cor.test(costofemp_redit_final$perceived_control_past, costofemp_redit_final$research_control_past)
-plot(costofemp_redit_final$perceived_control_past, costofemp_redit_final$research_control_past)
 cor.test(costofemp_redit_final$perceived_control_past, costofemp_redit_final$Validprev)
+plot(costofemp_redit_final$perceived_control_past, costofemp_redit_final$Validprev)
 ```
